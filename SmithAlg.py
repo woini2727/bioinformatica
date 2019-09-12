@@ -3,8 +3,9 @@ import sys
 
 def main(argv):
     sust=False
-    if argv=="-s":
-        sust = True
+    if len(argv)>1:
+        if argv=="-s":
+            sust = True
     referencia = str(input())
     secuencia = str(input())
     reflen = len(referencia) + 1
@@ -40,17 +41,29 @@ def sustitiution(referencia, secuencia, posref, possec):
 
 
 def alignment(matrix, n, n2, referencia, secuencia):
-    lastj = int(n - 1)
-    lasti = int(n2 - 1)
+    ##----------- get better score --------------------------###
+    may=0
+    lastj = 0
+    lasti = 0
+    for i in range(len(secuencia) + 1):
+        for j in range(len(referencia) + 1):
+            if matrix[i][j]>may:
+               may=matrix[i][j]
+               lasti=i
+               lastj=j
+    ##
+    print("Result: ",may)
     listaAlig = [matrix[lasti][lastj]]
     listaAligcoord = [(lasti, lastj)]
+    ##-------------------------------------------------------####
+
     zero=False
     while(not zero):
         diag = matrix[lasti - 1][lastj - 1]
         izq = matrix[lasti][lastj - 1]
         arr = matrix[lasti - 1][lastj]
-        maximo = max(diag, arr, izq)
-        if maximo==0:
+        maximo = diag
+        if diag==0:
             zero=True
         listaAlig.append(maximo)
         if maximo == diag:
@@ -62,9 +75,11 @@ def alignment(matrix, n, n2, referencia, secuencia):
         else:
             lasti = lasti - 1
             lastj = lastj
+
         listaAligcoord.append((lasti, lastj))
     l = listaAligcoord[::-1]
     l.pop(0)
+    print(l)
 
     ##---------------escribimos la secuencia--------------######
     ant = -1
@@ -80,18 +95,18 @@ def alignment(matrix, n, n2, referencia, secuencia):
             newstring += secuencia[i - 1]
     print("")
     for i in range(len(newstring)):
-        ##print()
-        ##print(newstring)
         if referencia[len(referencia)-i-1:] == newstring[len(newstring)-i-1]:
             print("|", end="|")
         else:
             print(" ", end="")
     print("")
     ##---------escribimos coincidencias------------------#########
-
-    print(referencia[n-len(l)-1:].upper())
+    for t in l:
+        i, j = t
+        print(referencia[j-1].upper(),end="")
+    print("")
     return l
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv)

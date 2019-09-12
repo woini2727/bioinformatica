@@ -3,10 +3,9 @@ import sys
 
 def main(argv):
     sust = False
-    if argv=="-s":
-        sust=True
-
-
+    if len(argv)>1:
+        if argv[1]=="-s":
+            sust=True
     referencia = str(input())
     secuencia = str(input())
     reflen = len(referencia) + 1
@@ -101,4 +100,4 @@ def alignment(matrix, n, n2, referencia, secuencia):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv)
