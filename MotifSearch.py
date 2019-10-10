@@ -1,51 +1,65 @@
-LONGMOTIV=8
+from collections import Counter
 
 def main():
-    punteros = [0, 0, 0, 0, 0, 0, 0]  ##lista del puntero de cada secuencia
     long_motiv = 8  ##tamaño del motivo (cantidad de nucleotidos)
     base = 4  ##base 4
-    cant_seq = 7  ## cant de sec
-    n = 40  ##cant de nucleotidos x sec
-    dna = ["CGGGGCTATGCAACTGGGTCGTCACATTCCCCTTTCGATA", "TTTGAGGGTGCCCAATAAATGCAACTCCAAAGCGGACAAA",
-           "GGATGCAACTGATGCCGTTTGACGACCTAAATCAACGGCC", "AAGGATGCAACTCCAGGAGCGCCTTTGCTGGTTCTACCTG",
-           "AATTTTCTAAAAAGATTATAATGTCGGTCCATGCAACTTC", "CTGCTGTACAACTGAGATCATGCTGCATGCAACTTTCAAC",
+    dna = ["CGGGGCTATGCAACTGGGTCGTCACATTCCCCTTTCGATA",
+           "TTTGAGGGTGCCCAATAAATGCAACTCCAAAGCGGACAAA",
+           "GGATGCAACTGATGCCGTTTGACGACCTAAATCAACGGCC",
+           "AAGGATGCAACTCCAGGAGCGCCTTTGCTGGTTCTACCTG",
+           "AATTTTCTAAAAAGATTATAATGTCGGTCCATGCAACTTC",
+           "CTGCTGTACAACTGAGATCATGCTGCATGCAACTTTCAAC",
            "TACATGATCTTTTGATGCAACTTGGATGAGGGAATGATGC"]
-    n = len(dna[0])
-    n = 20
+    cant_seq = len(dna) # cant de secuencias en la matriz
+    n = len(dna[0]) # cant de nucleotidos x sec
     #print("bestcore", bfMotifSearch(dna, t, n, long_motiv))
     print(simpleMedianSearch(dna, cant_seq, n, long_motiv))
     #####
 
 def simpleMedianSearch(dna,t,n,l):
-    punteros = [0, 0, 0, 0, 0, 0, 0]
+    punteros = [0] * t
     best_score = 0  ##random high number
-    best_motif=[]
-    i = 0
-    s = 0
-    while i >= 0:
+    best_motif = []
+    i = -1
+    while True:
         if i < (t-1):
             #print("i ", i)
-            s, i = nextvertex(punteros, i,t, n-l+1)
+            punteros, i = nextvertex(punteros, i,t, n-l+1)
         else:
-            score_calculado=score(s,dna)
-            if score_calculado>best_score:
+            score_calculado = consensusScore(punteros, dna, l)
+            if score_calculado > best_score:
                print(score_calculado)
-               best_score=score_calculado
-               best_motif=s[:LONGMOTIV]
-            s,i= nextvertex(punteros,i, t, n-l+1)
+               best_score = score_calculado
+               best_motif = punteros[:]
+            punteros, i = nextvertex(punteros,i, t, n-l+1)
+        if i == -1:
+            break
 
-    return  best_motif
+    return best_motif
+
+def consensusScore(s, dna, k):
+    """ Calculate consensus score where:
+        s is a vector of positions
+        dna is a matrix of same-length sequences
+        k is the length of the consensus string
+    """
+    score = 0
+    for i in range(0, k):
+        c = Counter(seq[offset+i] for seq, offset in zip(dna,s))
+        [(base, freq)] = c.most_common(1)
+        score += freq
+    return score
 
 #L ALTURA DEL ARBOL =cant de secuencias
 #k es el grado= long de la sec
 def nextvertex(punteros, i, l, k):
     if i < (l-1):
-        punteros[i+1] = 1
+        punteros[i+1] = 0
         tupla = (punteros, i + 1)
         return tupla
     else:
         for j in range(l-1, -1, -1):
-            if punteros[j] < k:
+            if punteros[j] < k-1:
                 punteros[j] += 1
                 tupla = (punteros, j)
                 return tupla
@@ -113,7 +127,7 @@ def contarbases(cadena, dicc):
 
 def nextLeaf(punteros, t, k):
     for i in range(t - 1, -1, -1):
-        if punteros[i] < k:
+        if punteros[i] < k-1:
             punteros[i] += 1
             return punteros
         punteros[i] = 0
@@ -121,12 +135,12 @@ def nextLeaf(punteros, t, k):
 
 
 def bypass(punteros,i,l,base):
-    for j in range(i,0,-1):
-        if punteros[j]<base:
+    for j in range(i, -1, -1):
+        if punteros[j] < base:
             punteros[j] += 1
-            tupla=(punteros,j)
+            tupla = (punteros,j)
             return tupla
-    tupla=(punteros,0)
+    tupla = (punteros, -1)
     return tupla
 
 if __name__ == '__main__':
