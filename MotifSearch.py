@@ -16,6 +16,50 @@ def main():
     print(simpleMedianSearch(dna, cant_seq, n, long_motiv))
     #####
 
+def bbMedianSearch(dna,t,n,l):
+    s = [0] * t
+    best_distance = 100
+    i = -1
+    best_word = ""
+
+    while True:
+        if i < (t - 1):
+            #prefix = to_nucleotides(s)
+            optim_distance = total_distance(dna,s,l,t)
+            if optim_distance > best_distance:
+               s, i = bypass(s,i,l,4)
+            else:
+               s, i = nextvertex(s,i,l,4)
+        else:
+            #word = to_nucleotides(s)
+            if total_distance(dna,s,l)<best_distance:
+               best_distance = total_distance(dna,s,l,t)
+               best_word = s
+            s,i=nextvertex(s,i,l,4)
+        if i == -1:
+            break
+
+    return best_word
+
+
+def total_distance(dna,s,l,t):
+    total_dist=l*t-consensusScore(s,dna,l)
+    return total_dist
+
+def to_nucleotides(s):
+    prefix = ""
+    for i in s:
+        if i==1:
+           prefix += "A"
+        elif i==2:
+            prefix += "C"
+        elif i==3:
+            prefix += "G"
+        elif i==4:
+            prefix += "T"
+
+    return prefix
+
 def simpleMedianSearch(dna,t,n,l):
     punteros = [0] * t
     best_score = 0  ##random high number
