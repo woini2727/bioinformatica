@@ -13,7 +13,8 @@ def main():
     cant_seq = len(dna) # cant de secuencias en la matriz
     n = len(dna[0]) # cant de nucleotidos x sec
     #print("bestcore", bfMotifSearch(dna, t, n, long_motiv))
-    print(simpleMedianSearch(dna, cant_seq, n, long_motiv))
+    #print(simpleMedianSearch(dna, cant_seq, n, long_motiv))
+    print(bbMedianSearch(dna, cant_seq, n, long_motiv))
     #####
 
 def bbMedianSearch(dna,t,n,l):
@@ -29,13 +30,13 @@ def bbMedianSearch(dna,t,n,l):
             if optim_distance > best_distance:
                s, i = bypass(s,i,l,4)
             else:
-               s, i = nextvertex(s,i,l,4)
+               s, i = nextvertex(s, i,t, 4)
         else:
             #word = to_nucleotides(s)
-            if total_distance(dna,s,l)<best_distance:
+            if total_distance(dna,s,l,t)<best_distance:
                best_distance = total_distance(dna,s,l,t)
                best_word = s
-            s,i=nextvertex(s,i,l,4)
+            s,i=nextvertex(s, i,t, 4)
         if i == -1:
             break
 
