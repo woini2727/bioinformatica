@@ -14,8 +14,11 @@ def main():
     n = len(dna[0]) # cant de nucleotidos x sec
     #print("bestcore", bfMotifSearch(dna, t, n, long_motiv))
     #print(simpleMedianSearch(dna, cant_seq, n, long_motiv))
-    print(bbMedianSearch(dna, cant_seq, n, long_motiv))
+    #print(bbMedianSearch(dna, cant_seq, n, long_motiv))
     #####
+    s=[0,0,0,0,0,0,0]
+    print(consensusScore(s,dna,long_motiv))
+
 
 def bbMedianSearch(dna,t,n,l):
     s = [0] * t
@@ -26,15 +29,15 @@ def bbMedianSearch(dna,t,n,l):
     while True:
         if i < (t - 1):
             #prefix = to_nucleotides(s)
-            optim_distance = total_distance(dna,s,l,t)
+            optim_distance = total_distance(dna,s,l)
             if optim_distance > best_distance:
                s, i = bypass(s,i,l,4)
             else:
                s, i = nextvertex(s, i,t, 4)
         else:
             #word = to_nucleotides(s)
-            if total_distance(dna,s,l,t)<best_distance:
-               best_distance = total_distance(dna,s,l,t)
+            if total_distance(dna,s,l)<best_distance:
+               best_distance = total_distance(dna,s,l)
                best_word = s
             s,i=nextvertex(s, i,t, 4)
         if i == -1:
@@ -42,10 +45,6 @@ def bbMedianSearch(dna,t,n,l):
 
     return best_word
 
-
-def total_distance(dna,s,l,t):
-    total_dist=l*t-consensusScore(s,dna,l)
-    return total_dist
 
 def to_nucleotides(s):
     prefix = ""
@@ -82,6 +81,17 @@ def simpleMedianSearch(dna,t,n,l):
 
     return best_motif
 
+
+def total_distance(dna,s,l):
+    total_distance=0
+    cons_str=consensusString(s,dna,l)
+
+    for i in range (len(cons_str)):
+        pass
+
+    return total_distance
+
+
 def consensusScore(s, dna, k):
     """ Calculate consensus score where:
         s is a vector of positions
@@ -89,11 +99,29 @@ def consensusScore(s, dna, k):
         k is the length of the consensus string
     """
     score = 0
+
     for i in range(0, k):
         c = Counter(seq[offset+i] for seq, offset in zip(dna,s))
         [(base, freq)] = c.most_common(1)
         score += freq
+
     return score
+
+def consensusString(s, dna, k):
+    """ Calculate consensus score where:
+        s is a vector of positions
+        dna is a matrix of same-length sequences
+        k is the length of the consensus string
+    """
+    cons_string = ""
+
+    for i in range(0, k):
+        c = Counter(seq[offset+i] for seq, offset in zip(dna,s))
+        [(base, freq)] = c.most_common(1)
+        cons_string += base
+
+    return cons_string
+
 
 #L ALTURA DEL ARBOL =cant de secuencias
 #k es el grado= long de la sec
