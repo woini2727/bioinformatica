@@ -1,7 +1,7 @@
 from collections import Counter
 
 def main():
-    long_motiv = 8  ##tamaño del motivo (cantidad de nucleotidos)
+    long_motiv = 8 ##tamaño del motivo (cantidad de nucleotidos)
     base = 4  ##base 4
     dna = ["CGGGGCTATGCAACTGGGTCGTCACATTCCCCTTTCGATA",
            "TTTGAGGGTGCCCAATAAATGCAACTCCAAAGCGGACAAA",
@@ -10,35 +10,32 @@ def main():
            "AATTTTCTAAAAAGATTATAATGTCGGTCCATGCAACTTC",
            "CTGCTGTACAACTGAGATCATGCTGCATGCAACTTTCAAC",
            "TACATGATCTTTTGATGCAACTTGGATGAGGGAATGATGC"]
+
     cant_seq = len(dna) # cant de secuencias en la matriz
     n = len(dna[0]) # cant de nucleotidos x sec
     #print("bestcore", bfMotifSearch(dna, t, n, long_motiv))
     #print(simpleMedianSearch(dna, cant_seq, n, long_motiv))
-    #print(bbMedianSearch(dna, cant_seq, n, long_motiv))
+    print(bbMedianSearch(dna, cant_seq, n, long_motiv))
     #####
-    s=[0,0,0,0,0,0,0]
-    print(consensusScore(s,dna,long_motiv))
-
 
 def bbMedianSearch(dna,t,n,l):
     s = [0] * t
     best_distance = 100
     i = -1
     best_word = ""
-
     while True:
         if i < (t - 1):
-            #prefix = to_nucleotides(s)
-            optim_distance = total_distance(dna,s,l)
+            prefix = to_nucleotides(s)
+            optim_distance = total_distance(dna,prefix,l)
             if optim_distance > best_distance:
                s, i = bypass(s,i,l,4)
             else:
-               s, i = nextvertex(s, i,t, 4)
+               s, i = nextvertex(s, i,t,4)
         else:
-            #word = to_nucleotides(s)
-            if total_distance(dna,s,l)<best_distance:
-               best_distance = total_distance(dna,s,l)
-               best_word = s
+            word = to_nucleotides(s)
+            if total_distance(dna,word,l)<best_distance:
+               best_distance = total_distance(dna,word,l)
+               best_word = word
             s,i=nextvertex(s, i,t, 4)
         if i == -1:
             break
@@ -49,13 +46,13 @@ def bbMedianSearch(dna,t,n,l):
 def to_nucleotides(s):
     prefix = ""
     for i in s:
-        if i==1:
+        if i==0:
            prefix += "A"
-        elif i==2:
+        elif i==1:
             prefix += "C"
-        elif i==3:
+        elif i==2:
             prefix += "G"
-        elif i==4:
+        elif i==3:
             prefix += "T"
 
     return prefix
@@ -83,11 +80,17 @@ def simpleMedianSearch(dna,t,n,l):
 
 
 def total_distance(dna,s,l):
-    total_distance=0
-    cons_str=consensusString(s,dna,l)
+    long_dna_seq = 40
+    total_distance = 0
 
-    for i in range (len(cons_str)):
-        pass
+    for seq in dna:
+        min_dist=l
+        for i in range(long_dna_seq-(l-1)):
+            distance = sum(c1 != c2 for c1, c2 in zip(s, seq[i:i+l]))
+            if distance < min_dist:
+               min_dist = distance
+               distance = 0
+        total_distance+=min_dist
 
     return total_distance
 
