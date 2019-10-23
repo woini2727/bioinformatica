@@ -1,5 +1,6 @@
 from collections import Counter
 
+
 def main():
     long_motiv = 8 ##tamaño del motivo (cantidad de nucleotidos)
     base = 4  ##base 4
@@ -11,50 +12,48 @@ def main():
            "CTGCTGTACAACTGAGATCATGCTGCATGCAACTTTCAAC",
            "TACATGATCTTTTGATGCAACTTGGATGAGGGAATGATGC"]
 
+    dna2 = ["CGGGGCTATCCAGCTGGGTCGT",
+          "GGATGGATCTGATGCCGTTTGA",
+          "AAGGAAGCAACCCCAGGAGCGC",
+           "TACATGATCTTTTGATGGCACT"]
+
     cant_seq = len(dna) # cant de secuencias en la matriz
     n = len(dna[0]) # cant de nucleotidos x sec
     #print("bestcore", bfMotifSearch(dna, t, n, long_motiv))
     #print(simpleMedianSearch(dna, cant_seq, n, long_motiv))
-    print(bbMedianSearch(dna, cant_seq, n, long_motiv))
-    #####
+    print("Best Motif: ",bbMedianSearch(dna, cant_seq, n, long_motiv))
 
 def bbMedianSearch(dna,t,n,l):
-    s = [0] * t
-    best_distance = 100
+    s = [0] * l
+    best_distance = 1000
     i = -1
     best_word = ""
+    best_p = None
+    best_q = None
     while True:
-        if i < (t - 1):
-            prefix = to_nucleotides(s)
-            optim_distance = total_distance(dna,prefix,l)
+        if i < (l - 1):
+            prefix = to_nucleotides(s[:i])
+            optim_distance, _, __ = total_distance(dna, prefix, l)
             if optim_distance > best_distance:
-               s, i = bypass(s,i,l,4)
+               s, i = bypass(s, i, l, 4)
             else:
-               s, i = nextvertex(s, i,t,4)
+               s, i = nextvertex(s, i, l, 4)
         else:
             word = to_nucleotides(s)
-            if total_distance(dna,word,l)<best_distance:
-               best_distance = total_distance(dna,word,l)
+            distance, p, q = total_distance(dna, word, l)
+            if distance < best_distance:
+               best_distance, best_p, best_q = distance, p, q
                best_word = word
-            s,i=nextvertex(s, i,t, 4)
+            s, i = nextvertex(s, i, l, 4)
         if i == -1:
             break
-
+    print("best distance: ",best_distance," positions: ", best_p, "distances: ",best_q)
     return best_word
 
 
 def to_nucleotides(s):
-    prefix = ""
-    for i in s:
-        if i==0:
-           prefix += "A"
-        elif i==1:
-            prefix += "C"
-        elif i==2:
-            prefix += "G"
-        elif i==3:
-            prefix += "T"
-
+    bases = {0: "A", 1: "C", 2: "G", 3: "T"}
+    prefix = "".join(bases[k] for k in s)
     return prefix
 
 def simpleMedianSearch(dna,t,n,l):
@@ -64,7 +63,6 @@ def simpleMedianSearch(dna,t,n,l):
     i = -1
     while True:
         if i < (t-1):
-            #print("i ", i)
             punteros, i = nextvertex(punteros, i,t, n-l+1)
         else:
             score_calculado = consensusScore(punteros, dna, l)
@@ -80,19 +78,21 @@ def simpleMedianSearch(dna,t,n,l):
 
 
 def total_distance(dna,s,l):
-    long_dna_seq = 40
+    long_dna_seq = len(dna[0])
     total_distance = 0
-
-    for seq in dna:
-        min_dist=l
-        for i in range(long_dna_seq-(l-1)):
+    p = [0] * len(dna)
+    q = [0] * len(dna)
+    for k, seq in enumerate(dna):
+        min_dist = l
+        for i in range(long_dna_seq-l+1):
             distance = sum(c1 != c2 for c1, c2 in zip(s, seq[i:i+l]))
             if distance < min_dist:
-               min_dist = distance
-               distance = 0
-        total_distance+=min_dist
+                min_dist = distance
+                p[k] = i
+                q[k] = distance
+        total_distance += min_dist
 
-    return total_distance
+    return total_distance, p, q
 
 
 def consensusScore(s, dna, k):
@@ -139,7 +139,6 @@ def nextvertex(punteros, i, l, k):
                 punteros[j] += 1
                 tupla = (punteros, j)
                 return tupla
-
     return punteros, -1
 
 def bfMotifSearch(dna, t, n, l):
@@ -212,7 +211,7 @@ def nextLeaf(punteros, t, k):
 
 def bypass(punteros,i,l,base):
     for j in range(i, -1, -1):
-        if punteros[j] < base:
+        if punteros[j] < base-1:
             punteros[j] += 1
             tupla = (punteros,j)
             return tupla
