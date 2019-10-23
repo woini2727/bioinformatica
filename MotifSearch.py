@@ -21,7 +21,8 @@ def main():
     n = len(dna[0]) # cant de nucleotidos x sec
     #print("bestcore", bfMotifSearch(dna, t, n, long_motiv))
     #print(simpleMedianSearch(dna, cant_seq, n, long_motiv))
-    print("Best Motif: ",bbMedianSearch(dna, cant_seq, n, long_motiv))
+    #print("Best Motif: ",bbMedianSearch(dna, cant_seq, n, long_motiv))
+    print("Best Motif: ",improvedBbMedianSearch(dna, cant_seq, n, long_motiv))
 
 def bbMedianSearch(dna,t,n,l):
     s = [0] * l
@@ -38,6 +39,40 @@ def bbMedianSearch(dna,t,n,l):
                s, i = bypass(s, i, l, 4)
             else:
                s, i = nextvertex(s, i, l, 4)
+        else:
+            word = to_nucleotides(s)
+            distance, p, q = total_distance(dna, word, l)
+            if distance < best_distance:
+               best_distance, best_p, best_q = distance, p, q
+               best_word = word
+            s, i = nextvertex(s, i, l, 4)
+        if i == -1:
+            break
+    print("best distance: ",best_distance," positions: ", best_p, "distances: ",best_q)
+    return best_word
+
+def improvedBbMedianSearch(dna,t,n,l):
+    s = [0] * l
+    bestSubstring= [100] * l
+    best_distance = 100
+    i = -1
+    best_word = ""
+    best_p = None
+    best_q = None
+    while True:
+        if i < (l - 1):
+            prefix = to_nucleotides(s[:i])
+            optim_Prefix_distance, _, __ = total_distance(dna, prefix, l)
+            if optim_Prefix_distance < bestSubstring[i+1]:
+               bestSubstring[i+1] = optim_Prefix_distance
+               if (l-1)-(i+1)< i+1:
+                  optim_Sufix_distance = bestSubstring[(l-1)-(i+1)]
+               else:
+                  optim_Sufix_distance = 0
+               if optim_Prefix_distance + optim_Sufix_distance >= best_distance:
+                   s, i = bypass(s, i, l, 4)
+               else:
+                   s, i = nextvertex(s, i, l, 4)
         else:
             word = to_nucleotides(s)
             distance, p, q = total_distance(dna, word, l)
