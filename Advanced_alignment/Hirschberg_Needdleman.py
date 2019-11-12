@@ -1,14 +1,14 @@
 
 def main():
-    ref="GATTACA"
-    seq="GCAATCA"
+    ref = "GATTACA"
+    seq = "GCAATCA"
 
-    n=min(len(ref),len(seq))
-    m=max(len(ref),len(seq))
+    n = min(len(ref), len(seq))
+    m = max(len(ref), len(seq))
 
     ##Init Matrix
-    matrix=[[0]* 2 for i in range(m)]
-    cont=0
+    matrix = [[0] * 2 for i in range(m)]
+    cont = 0
     for i in range(m):
         matrix[i][0] = cont
         matrix[i][1] = 0
