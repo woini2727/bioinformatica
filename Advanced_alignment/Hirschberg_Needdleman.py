@@ -1,5 +1,6 @@
 
 def main():
+    list_alig = []
     ref = "GATTACA"
     seq = "GCAATCA"
     if len(ref) < len(seq):
@@ -22,18 +23,23 @@ def main():
     n = (n // 2) + 1
     prefix = seq[:n]
     sufix =  seq[n-1:]
-    print(prefix)
-    print(sufix)
-    col1,col2=max_score(m, ref, prefix, col1, col2)
+    list_palabras = []
+    list_palabras.append(prefix)
+    list_palabras.append(sufix)
+
+    while (len(list_palabras) !=0):
+        prefix = list_palabras[0]
+        list_alig,pos=max_score(m, ref, prefix, col1, col2,list_alig)
+        ref = ref[:pos+1]
+        list_palabras.pop(0)
+        if prefix//2 !=1:
+           list_palabras.append(prefix[(len(prefix)//2) -1:])
+           list_palabras.append(prefix[:len(prefix)//2])
+
+
+
 
     #sufix
-
-    """print("SUFIX")
-    seq=seq[len(seq)//2:]
-    col1=col2
-    col2 = [0 * i for i in range(m)]
-    max_score(n, m, ref, seq, col1, col2)"""
-
 
 def find_max_pos(col,m):
     maxi = -100000
@@ -44,10 +50,11 @@ def find_max_pos(col,m):
             pos = i
     return (maxi, pos)
 
-def max_score(m,ref,prefix,col1,col2):
+def max_score(m,ref,prefix,col1,col2,list_alig):
         #n = (n + 1) // 2
         contt = 0
         m -= contt
+        print(col1)
         for i in range(len(prefix)):
             for j in range(m):
                 if j == 0:
@@ -60,15 +67,12 @@ def max_score(m,ref,prefix,col1,col2):
                         col2[j] = max(diag + 1, sup, izq)
                     else:
                         col2[j] = max(diag - 1, sup, izq)
-                # necesito el mayor de la segunda fila y la pos
-            #print([(x, y) for (x, y) in zip(col1, col2)])
             col1 = col2
             col2 = [0 * i for i in range(m)]
             print(col1)
-        print(col1)
-        print(find_max_pos(col1,m))
-
-        return (col1,col2)
+        maxi,pos = find_max_pos(col1,m)
+        list_alig.append(maxi)
+        return (maxi,pos)
 
 if __name__ == '__main__':
     main()
