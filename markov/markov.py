@@ -5,8 +5,6 @@ def markov():
     states = ["F","B"]
     matrizA = [[0.50,0.75],[0.5,0.25]]
     matrizE = [[0.7,0.3],[0.3,0.7]]
-
-    output_list = ["T","H","H","H","H","H","H"]
     output_list = ["T","H","H","H","H","H","H"]
     trelli_1 = {}
     trelli_2 = {}
@@ -36,7 +34,6 @@ def markov():
                 #print("ante",trelli_1[state][-1])
                 #print(matrizA[symbols.index(output_list[i])][states.index(state)])
                 #print(matrizE[states.index(st)][states.index(state)])
-
                 maxm = max(val1,maxm)
             trelli_2[st].append(st_m)
             trelli_aux[st].append(maxm)
