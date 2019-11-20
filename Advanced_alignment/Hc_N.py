@@ -44,30 +44,53 @@ def hirschberg(seq,ref):
             z += ref[i]
             w += "-"
     elif len(ref) == 1 or len(seq) == 1:
-        z,w = needlemanWunsch(ref,seq)
+        l = list(needlemanWunsch(ref,seq))
     else:
         refmid = len(ref) // 2
         rev = ref[::-1]
         scoreizq = score(seq, ref[:refmid])
         scoreder = score(seq[::-1],rev[refmid:])
-        seqmid = find_max_pos(scoreizq,scoreder)
+        seqmid = find_max_pos(scoreizq,reversed(scoreder))
         print(seqmid)
         z,w= str(hirschberg(ref[: refmid],seq[ :seqmid+1])),str( hirschberg(ref[refmid:],seq[seqmid+1:]))
 
     return (z,w)
 
 def find_max_pos(score1,score2):
-    pts = []
-    for s1,s2 in zip(score1,score2):
-        pts.append(s1+s2)
-        print(s1+s2)
+    pts = [s1 + s2 for s1, s2 in zip(score1, score2)]
     maximo = max(pts)
     pos = pts.index(maximo)
     return pos
 
 def needlemanWunsch(ref,seq):
-    print(0)
-    return "",""
+    dp_table = [[0] * (len(seq)+1) for _ in range(len(ref)+1)]
+    for i in range(1, len(ref)+1):
+        for j in range(1, len(seq)+1):
+            similarity = 1 if ref[i-1] == seq[j-1] else -1
+            gap_penalty = -1
+            dp_table[i][j] = max(
+                    dp_table[i-1][j-1] + similarity,
+                    dp_table[i-1][j] + gap_penalty,
+                    dp_table[i][j-1] + gap_penalty
+                    )
+    i, j = len(ref), len(seq)
+    while i != 0 and j != 0:
+        yield (i,j)
+        print(i,j)
+        print(ref, seq)
+        similarity = 1 if ref[i-1] == seq[j-1] else -1
+        gap_penalty = -1
+        a, b, c = dp_table[i-1][j-1] + similarity, dp_table[i-1][j] + gap_penalty, dp_table[i][j-1] + gap_penalty
+        m = min(a,b,c)
+        if m == a:
+            i -= 1
+            j -= 1
+        elif m == b:
+            i -= 1
+        elif m == c:
+            j -= 1
+    yield (i,j)
+
 
 if __name__ == '__main__':
     main()
