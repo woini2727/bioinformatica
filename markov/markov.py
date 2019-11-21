@@ -26,12 +26,11 @@ def markov(symbols,states,matrizA,matrizE,output_list):
             st_m=""
             for state in states:
                 #val1 =  trelli_1[state][-1] * (matrizA[symbols.index(output_list[i])][states.index(state)]) * (matrizE[states.index(st)][states.index(state)])
-                val1 =  math.exp(log10(trelli_1[state][-1]) + log10(matrizA[symbols.index(output_list[i])][states.index(state)]) + log10(matrizE[states.index(st)][states.index(state)]))
+                val1 =  math.exp(log(trelli_1[state][-1]) + log(matrizA[symbols.index(output_list[i])][states.index(state)]) + log(matrizE[states.index(st)][states.index(state)]))
                 if val1>maxm:
                     st_m=state
                     maxm = val1
                 maxm = max(val1,maxm)
-                print(maxm)
                 #maxm =
             trelli_2[st].append(st_m)
             trelli_aux[st].append(maxm)
