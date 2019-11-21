@@ -1,11 +1,8 @@
+from math import log,log10
+import math
 
-def markov():
+def markov(symbols,states,matrizA,matrizE,output_list):
     # settings
-    symbols = ["H","T"]
-    states = ["F","B"]
-    matrizA = [[0.50,0.75],[0.5,0.25]]
-    matrizE = [[0.7,0.3],[0.3,0.7]]
-    output_list = ["T","H","H","H","H","H","H"]
     trelli_1 = {}
     trelli_2 = {}
     trelli_aux = {}
@@ -25,16 +22,17 @@ def markov():
     maxm = -1
     for i in range(1,len(output_list)):
         for st in states:
-            maxm = -1
+            maxm = -10
             st_m=""
             for state in states:
-                val1 =  trelli_1[state][-1] * (matrizA[symbols.index(output_list[i])][states.index(state)]) * (matrizE[states.index(st)][states.index(state)])
+                #val1 =  trelli_1[state][-1] * (matrizA[symbols.index(output_list[i])][states.index(state)]) * (matrizE[states.index(st)][states.index(state)])
+                val1 =  math.exp(log10(trelli_1[state][-1]) + log10(matrizA[symbols.index(output_list[i])][states.index(state)]) + log10(matrizE[states.index(st)][states.index(state)]))
                 if val1>maxm:
                     st_m=state
-                #print("ante",trelli_1[state][-1])
-                #print(matrizA[symbols.index(output_list[i])][states.index(state)])
-                #print(matrizE[states.index(st)][states.index(state)])
+                    maxm = val1
                 maxm = max(val1,maxm)
+                print(maxm)
+                #maxm =
             trelli_2[st].append(st_m)
             trelli_aux[st].append(maxm)
 
@@ -55,8 +53,12 @@ def markov():
     print(trelli_2[st_b])
 
 
-
-
-
 if __name__ == '__main__':
-    markov()
+
+    symbols = ["H", "T"]
+    states = ["F", "B"]
+    matrizA = [[0.50, 0.75], [0.5, 0.25]]
+    matrizE = [[0.7, 0.3], [0.3, 0.7]]
+    output_list = ["T", "H", "H", "H", "H", "H", "H"]
+
+    markov(symbols,states,matrizA,matrizE,output_list)
