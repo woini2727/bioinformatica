@@ -16,7 +16,7 @@ def markov(symbols,states,matrizA,matrizE,output_list):
     for state in states:
         indexi = symbols.index(output_list[0])
         indexj = states.index(state)
-        trelli_1[state].append(matrizA[indexi][indexj]/len(symbols))
+        trelli_1[state].append(matrizE[indexi][indexj]/len(symbols))
         trelli_2[state].append("0")
     # complete trellis
     maxm = -1
@@ -25,8 +25,8 @@ def markov(symbols,states,matrizA,matrizE,output_list):
             maxm = -10
             st_m=""
             for state in states:
-                #val1 =  trelli_1[state][-1] * (matrizA[symbols.index(output_list[i])][states.index(state)]) * (matrizE[states.index(st)][states.index(state)])
-                val1 =  math.exp(log(trelli_1[state][-1]) + log(matrizA[symbols.index(output_list[i])][states.index(state)]) + log(matrizE[states.index(st)][states.index(state)]))
+                #val1 =  trelli_1[state][-1] * (matrizE[symbols.index(output_list[i])][states.index(state)]) * (matrizA[states.index(st)][states.index(state)])
+                val1 =  math.exp(log(trelli_1[state][-1]) + log(matrizE[symbols.index(output_list[i])][states.index(state)]) + log(matrizA[states.index(st)][states.index(state)]))
                 if val1>maxm:
                     st_m=state
                     maxm = val1
@@ -56,8 +56,8 @@ if __name__ == '__main__':
 
     symbols = ["H", "T"]
     states = ["F", "B"]
-    matrizA = [[0.50, 0.75], [0.5, 0.25]]
-    matrizE = [[0.7, 0.3], [0.3, 0.7]]
+    matrizE = [[0.50, 0.75], [0.5, 0.25]]
+    matrizA = [[0.7, 0.3], [0.3, 0.7]]
     output_list = ["T", "H", "H", "H", "H", "H", "H"]
 
     markov(symbols,states,matrizA,matrizE,output_list)
