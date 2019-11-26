@@ -1,9 +1,11 @@
 import operator
 
-def main():
-    ref = "AGTACGCA"
-    seq = "TATGC"
-    print(hirschberg(seq,ref))
+def main(seq,ref):
+    #ref = "AGTACGCA"
+    #seq = "TATGC"
+    z = ""
+    w = ""
+    print(hirschberg(seq,ref,z,w))
 
 
 def score(seq,ref):
@@ -14,7 +16,6 @@ def score(seq,ref):
     for i in range(m):
         col1[i] = cont
         cont -= 1
-    print(col1)
     for i in range(len(seq)):
         for j in range(m):
             if j == 0:
@@ -29,12 +30,9 @@ def score(seq,ref):
                     col2[j] = max(diag - 1, sup, izq)
         col1 = col2
         col2 = [0 * i for i in range(m)]
-        print(col1)
         return col1
 
-def hirschberg(seq,ref):
-    z = ""
-    w = ""
+def hirschberg(seq,ref,z,w):
     if len(ref) == 0:
       for i in range(len(seq)):
         z = z + "-"
@@ -45,15 +43,14 @@ def hirschberg(seq,ref):
             w += "-"
     elif len(ref) == 1 or len(seq) == 1:
         l = list(needlemanWunsch(ref,seq))
+        print(l)
     else:
         refmid = len(ref) // 2
         rev = ref[::-1]
         scoreizq = score(seq, ref[:refmid])
         scoreder = score(seq[::-1],rev[refmid:])
         seqmid = find_max_pos(scoreizq,reversed(scoreder))
-        print(seqmid)
-        z,w= str(hirschberg(ref[: refmid],seq[ :seqmid+1])),str( hirschberg(ref[refmid:],seq[seqmid+1:]))
-
+        z,w= hirschberg(ref[: refmid],seq[ :seqmid+1],z,w), hirschberg(ref[refmid:],seq[seqmid:],z,w)
     return (z,w)
 
 def find_max_pos(score1,score2):
@@ -63,7 +60,7 @@ def find_max_pos(score1,score2):
     return pos
 
 def needlemanWunsch(ref,seq):
-    dp_table = [[0] * (len(seq)+1) for _ in range(len(ref)+1)]
+    dp_table = [[0] * (len(seq)+1)  for i in range(len(ref)+1)]
     for i in range(1, len(ref)+1):
         for j in range(1, len(seq)+1):
             similarity = 1 if ref[i-1] == seq[j-1] else -1
@@ -76,8 +73,7 @@ def needlemanWunsch(ref,seq):
     i, j = len(ref), len(seq)
     while i != 0 and j != 0:
         yield (i,j)
-        print(i,j)
-        print(ref, seq)
+        #print(ref[i-1],seq[j-1])
         similarity = 1 if ref[i-1] == seq[j-1] else -1
         gap_penalty = -1
         a, b, c = dp_table[i-1][j-1] + similarity, dp_table[i-1][j] + gap_penalty, dp_table[i][j-1] + gap_penalty
@@ -91,6 +87,12 @@ def needlemanWunsch(ref,seq):
             j -= 1
     yield (i,j)
 
-
 if __name__ == '__main__':
-    main()
+    ref = "GATTACA"
+    seq = "GATTACA"
+    #for nums in needlemanWunsch(ref,seq):
+       #i,j=nums
+       #print(nums)
+
+    main(seq,ref)
+
