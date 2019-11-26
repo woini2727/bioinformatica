@@ -19,7 +19,7 @@ def markov(symbols,states,matrizA,matrizE,output_list):
         trelli_1[state].append(matrizE[indexi][indexj]/len(symbols))
         trelli_2[state].append("0")
     # complete trellis
-    maxm = -1
+
     for i in range(1,len(output_list)):
         for st in states:
             maxm = -10
@@ -31,7 +31,6 @@ def markov(symbols,states,matrizA,matrizE,output_list):
                     st_m=state
                     maxm = val1
                 maxm = max(val1,maxm)
-                #maxm =
             trelli_2[st].append(st_m)
             trelli_aux[st].append(maxm)
 
