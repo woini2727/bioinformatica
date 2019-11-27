@@ -1,62 +1,61 @@
-from math import log,log10
-import math
+from math import log, inf, exp
 
-def markov(symbols,states,matrizA,matrizE,output_list):
+def markov(symbols, states, matrizA, matrizE, I, output_list):
     # settings
     trelli_1 = {}
     trelli_2 = {}
-    trelli_aux = {}
 
-    # end settings
-    for state in states:
-        trelli_1[state] = []
-        trelli_2[state] = []
-        trelli_aux[state] = []
     # init trelli_1 and trelli_2
-    for state in states:
+    for indexj, state in enumerate(states):
         indexi = symbols.index(output_list[0])
-        indexj = states.index(state)
-        trelli_1[state].append(matrizE[indexi][indexj]/len(symbols))
-        trelli_2[state].append("0")
+        trelli_1[state] = [0.0] * len(output_list)
+        trelli_1[state][0] = log(I[state]) + log(matrizE[indexi][indexj])
+        trelli_2[state] = ['0'] * len(output_list)
+
     # complete trellis
-
     for i in range(1,len(output_list)):
-        for st in states:
-            maxm = -10
-            st_m=""
-            for state in states:
-                #val1 =  trelli_1[state][-1] * (matrizE[symbols.index(output_list[i])][states.index(state)]) * (matrizA[states.index(st)][states.index(state)])
-                val1 =  math.exp(log(trelli_1[state][-1]) + log(matrizE[symbols.index(output_list[i])][states.index(state)]) + log(matrizA[states.index(st)][states.index(state)]))
-                if val1>maxm:
-                    st_m=state
-                    maxm = val1
-                maxm = max(val1,maxm)
-            trelli_2[st].append(st_m)
-            trelli_aux[st].append(maxm)
+        for st_index, st in enumerate(states):
+            max_previous = -inf # maxima probabilidad anterior hallada (excluye P. de emision)
+            st_previous  = ""   # estado que genero max_previous
 
-        #print(trelli_aux)
-        for st in states:
-            trelli_1[st].append(trelli_aux[st][-1])
-    #print(matrizA[symbols.index("T")][states.index("F")])
-    n = -1
-    st_b=""
-    for st in states:
-        if trelli_1[st][-1]>n:
-            st_b=st
-            n = trelli_1[st][-1]
+            # buscar el mejor estado anterior
+            for state_index, state in enumerate(states):
+                val1 = trelli_1[state][i-1] + log(matrizA[state_index][st_index])
+                if val1 > max_previous:
+                    max_previous = val1
+                    st_previous = state
 
+            # guardar probabilidad de transicionar a este estado y emitir el simbolo
+            trelli_1[st][i] = max_previous + log(matrizE[symbols.index(output_list[i])][st_index])
 
-    print(trelli_1)
-    print(trelli_2)
-    print(trelli_2[st_b])
+            # guardar el estado anterior para backtracking
+            trelli_2[st][i] = st_previous
+
+    # backtracking hasta llegar al sentinela
+    s = max(states, key=lambda st: trelli_1[st][-1])
+    result = []
+    while s != '0':
+        result.append(s)
+        s = trelli_2[s][-len(result)-1]
+    result.reverse()
+
+    print('Trellis 1')
+    for state in states:
+        print(state, *map(exp, trelli_1[state]))
+    print('Trellis 2')
+    for state in states:
+        print(state, *trelli_2[state])
+    print('Best Path')
+    print(*result)
 
 
 if __name__ == '__main__':
-
     symbols = ["H", "T"]
     states = ["F", "B"]
     matrizE = [[0.50, 0.75], [0.5, 0.25]]
     matrizA = [[0.7, 0.3], [0.3, 0.7]]
-    output_list = ["T", "H", "H", "H", "H", "H", "H"]
+    I = {'F': 0.5, 'B': 0.5} # probabilidades iniciales
 
-    markov(symbols,states,matrizA,matrizE,output_list)
+    markov(symbols,states,matrizA,matrizE,I, "THHHHHH")
+    print()
+    markov(symbols,states,matrizA,matrizE,I, "TTHHHHT")
