@@ -1,41 +1,91 @@
 import sys
+from math import log
 
 
 def main(argv):
+    afin = False
     sust = False
+    penalty = False
     if len(argv)>1:
         if argv[1]=="-s":
-            sust=True
+            sust = True
+        elif argv[1]=="-a":
+            afin = True
+        elif argv[1]=="-ac":
+            penalty = True
     referencia = str(input())
     secuencia = str(input())
     reflen = len(referencia) + 1
     seclen = len(secuencia) + 1
+
     a = [[0] * reflen for i in range(seclen)]
 
-    # inicializamos
-    lmb = 1
-    for i in range(len(referencia) + 1):
-        lmb -= 1
-        a[0][i] = lmb
-    lmb = 1
-    for i in range(len(secuencia) + 1):
-        lmb -= 1
-        a[i][0] = lmb
-        # print(a)
-    for i in range(1, len(secuencia) + 1):
-        for j in range(1, len(referencia) + 1):
-            diag = a[i - 1][j - 1]
-            izq = a[i][j - 1] - 1
-            sup = a[i - 1][j] - 1
+    ##inicializamos matrices de la f afín
+    a_inf = [[0] * reflen for i in range(seclen)]
+    a_der = [[0] * reflen for i in range(seclen)]
 
-            if sust:
-                value=sustitiution(referencia, secuencia,j - 1,i - 1)
-                a[i][j] = max(diag + value, sup, izq)
-            else:
-                if referencia[j - 1] == secuencia[i - 1]:
-                    a[i][j] = max(diag + 1, sup, izq)
+    # inicializamos
+    if not penalty:
+        lmb = 1
+        for i in range(len(referencia) + 1):
+            lmb -= 1
+            a[0][i] = lmb
+            a_inf[0][i] = lmb
+            a_der[0][i] = lmb
+        lmb = 1
+        rho = 2
+        for i in range(len(secuencia) + 1):
+            lmb -= 1
+            a[i][0] = lmb
+            a_inf[i][0] = lmb
+            a_der[i][0] = lmb
+            # print(a)
+        for i in range(1, len(secuencia) + 1):
+            for j in range(1, len(referencia) + 1):
+                diag = a[i - 1][j - 1]
+                izq = a[i][j - 1] - 1
+                sup = a[i - 1][j] - 1
+
+                if sust:
+                    value = sustitiution(referencia, secuencia, j - 1, i - 1)
+                    a[i][j] = max(diag + value, sup, izq)
+                elif afin:
+                    a_inf[i][j] = max(a_inf[i - 1][j] - 1, a[i - 1][j] - rho)
+                    a_der[i][j] = max(a_der[i][j - 1] - 1, a[i][j - 1] - rho)
+                    if referencia[j - 1] == secuencia[i - 1]:
+                        a[i][j] = max(diag + 1, a_der[i][j], a_inf[i][j])
+                    else:
+                        a[i][j] = max(diag - 1, a_der[i][j], a_inf[i][j])
                 else:
-                    a[i][j] = max(diag - 1, sup, izq)
+                    if referencia[j - 1] == secuencia[i - 1]:
+                        a[i][j] = max(diag + 1, sup, izq)
+                    else:
+                        a[i][j] = max(diag - 1, sup, izq)
+
+    else:
+        lmb = 1
+        rho = -2
+        for i in range(len(referencia) + 1):
+            a[0][i] = lmb
+            a_inf[0][i] = lmb
+            a_der[0][i] = lmb
+        for i in range(len(secuencia) + 1):
+            a[i][0] = lmb
+            a_inf[i][0] = lmb
+            a_der[i][0] = lmb
+        lmb = -1
+        print(a_inf)
+        for i in range(1, len(secuencia) + 1):
+            for j in range(1, len(referencia) + 1):
+                if referencia[j - 1] != secuencia[i - 1]:
+                    a_inf[i][j] = a_inf[i - 1][j] + 1
+                    a_der[i][j] = a_der[i][j - 1] + 1
+                    print(a_inf[i][j],a_der[i][j])
+                    a[i][j] = lmb*(log(min(a_der[i][j],a_inf[i][j]))) + rho  ##penalty
+                else:
+                    a_inf[i][j] = 0
+                    a_der[i][j] = 0
+                    a[i][j] = 0
 
     print(a)
     print(alignment(a, reflen, seclen, referencia, secuencia))
