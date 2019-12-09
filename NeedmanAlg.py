@@ -1,153 +1,83 @@
 import sys
-from math import log
+from math import log,inf
+import argparse
 
 
-def main(argv):
-    afin = False
-    sust = False
-    penalty = False
-    if len(argv)>1:
-        if argv[1]=="-s":
-            sust = True
-        elif argv[1]=="-a":
-            afin = True
-        elif argv[1]=="-ac":
-            penalty = True
+def main(sust,afin,penalty):
     referencia = str(input())
     secuencia = str(input())
     reflen = len(referencia) + 1
     seclen = len(secuencia) + 1
 
+    delta = -1
+    rho = 0
     a = [[0] * reflen for i in range(seclen)]
-
     ##inicializamos matrices de la f afín
     a_inf = [[0] * reflen for i in range(seclen)]
     a_der = [[0] * reflen for i in range(seclen)]
 
-    # inicializamos
-    if not penalty:
-        lmb = 1
-        for i in range(len(referencia) + 1):
-            lmb -= 1
-            a[0][i] = lmb
-            a_inf[0][i] = lmb
-            a_der[0][i] = lmb
-        lmb = 1
-        rho = 2
-        for i in range(len(secuencia) + 1):
-            lmb -= 1
-            a[i][0] = lmb
-            a_inf[i][0] = lmb
-            a_der[i][0] = lmb
-            # print(a)
-        for i in range(1, len(secuencia) + 1):
-            for j in range(1, len(referencia) + 1):
-                diag = a[i - 1][j - 1]
-                izq = a[i][j - 1] - 1
-                sup = a[i - 1][j] - 1
+    a_der[0][1] = rho+delta
+    for i in range(2,len(referencia)+1):
+        a_der[0][i] = a_der[0][i-1] + delta
+    for j in range(1,len(secuencia)+1):
+        a_der[j][0] = -inf
 
-                if sust:
-                    value = sustitiution(referencia, secuencia, j - 1, i - 1)
-                    a[i][j] = max(diag + value, sup, izq)
-                elif afin:
-                    a_inf[i][j] = max(a_inf[i - 1][j] - 1, a[i - 1][j] - rho)
-                    a_der[i][j] = max(a_der[i][j - 1] - 1, a[i][j - 1] - rho)
-                    if referencia[j - 1] == secuencia[i - 1]:
-                        a[i][j] = max(diag + 1, a_der[i][j], a_inf[i][j])
-                    else:
-                        a[i][j] = max(diag - 1, a_der[i][j], a_inf[i][j])
-                else:
-                    if referencia[j - 1] == secuencia[i - 1]:
-                        a[i][j] = max(diag + 1, sup, izq)
-                    else:
-                        a[i][j] = max(diag - 1, sup, izq)
+    a_inf[1][0] = rho+delta
+    for j in range (2,len(secuencia)+1):
+        a_inf[j][0] = a_inf[j-1][0] + delta
+    for i in range (1,len(referencia)+1):
+        a_inf[0][i] = -inf
 
-    else:
-        lmb = 1
-        rho = -2
-        for i in range(len(referencia) + 1):
-            a[0][i] = lmb
-            a_inf[0][i] = lmb
-            a_der[0][i] = lmb
-        for i in range(len(secuencia) + 1):
-            a[i][0] = lmb
-            a_inf[i][0] = lmb
-            a_der[i][0] = lmb
-        lmb = -1
-        print(a_inf)
-        for i in range(1, len(secuencia) + 1):
-            for j in range(1, len(referencia) + 1):
-                if referencia[j - 1] != secuencia[i - 1]:
-                    a_inf[i][j] = a_inf[i - 1][j] + 1
-                    a_der[i][j] = a_der[i][j - 1] + 1
-                    print(a_inf[i][j],a_der[i][j])
-                    a[i][j] = lmb*(log(min(a_der[i][j],a_inf[i][j]))) + rho  ##penalty
-                else:
-                    a_inf[i][j] = 0
-                    a_der[i][j] = 0
-                    a[i][j] = 0
+    for i in range(1,len(referencia)+1):
+        a[0][i] = a_der[0][i]
+    for j in  range (1,len(secuencia)+1):
+        a[j][0] = a_inf[j][0]
 
-    print(a)
-    print(alignment(a, reflen, seclen, referencia, secuencia))
-    print("score: ", a[-1][-1])
+    for i in range(1, len(secuencia) + 1):
+        for j in range(1, len(referencia) + 1):
+            similaridad = sustitiution(referencia[j-1],secuencia[i-1])
+            a_der[i][j] = max(a_der[i][j-1] + delta,a[i][j-1] + delta+rho)
+            a_inf[i][j] = max(a_inf[i-1][j] + delta, a[i-1][j] + delta +rho)
+            a[i][j] = max(a[i-1][j-1]+similaridad, a_der[i][j], a_inf[i][j])
 
-def sustitiution(referencia, secuencia,posref,possec):
+    print(alignment(a,a_der,a_inf,referencia,secuencia))
+
+
+def sustitiution(a, b):
     sub_list=["a","c","g","t"]
-    indexref=sub_list.index(referencia[posref])
-    indexsec = sub_list.index(secuencia[possec])
+    indexref=sub_list.index(a)
+    indexsec = sub_list.index(b)
 
     matrix_sust = [[1,-1,-1,-1], [-1,1,-1,-1], [-1,-1,1,-1], [-1,-1,-1,1]]
     value =matrix_sust[indexref][indexsec]
     return value
 
-def alignment(matrix, n, n2, referencia, secuencia):
-    lastj = int(n - 1)
-    lasti = int(n2 - 1)
-    listaAlig = [matrix[lasti][lastj]]
-    listaAligcoord = [(lasti, lastj)]
-    for i in range(1, n):
-        diag = matrix[lasti - 1][lastj - 1]
-        izq = matrix[lasti][lastj - 1]
-        arr = matrix[lasti - 1][lastj]
-        maximo = max(diag, arr, izq)
-        listaAlig.append(maximo)
-        if maximo == diag:
-            lasti = lasti - 1
-            lastj = lastj - 1
-        elif maximo == izq:
-            lasti = lasti
-            lastj = lastj - 1
-        else:
-            lasti = lasti - 1
-            lastj = lastj
-        listaAligcoord.append((lasti, lastj))
-    l = listaAligcoord[::-1]
-    l.pop(0)
-    ##---------------escribimos la secuencia--------------######
-    ant = -1
-    newstring = ""
-    for t in l:
-        i, j = t
-        if i - 1 == ant:
-            print("-", end="")
-            newstring += "-"
-        else:
-            ant = i - 1
-            print(secuencia[i - 1].upper(), end="")
-            newstring += secuencia[i - 1]
-    print("")
-    for i in range(len(referencia)):
-        if referencia[i] == newstring[i]:
-            print("|", end="")
-        else:
-            print(" ", end="")
-    print("")
-    ##---------escribimos coincidencias------------------#########
+def alignment(a,a_der,a_inf,referencia,secuencia):
+    i,j =  len(secuencia),len(referencia)
+    string_a = ""
+    string_b = ""
+    while i != 0 or j != 0:
+        similitud = sustitiution(referencia[j-1],secuencia[i-1])
+        if i > 0 and j > 0  and (a[i][j] == similitud + a[i-1][j-1]):
+           i -= 1
+           j -= 1
+           string_a += referencia[j]
+           string_b += secuencia[i]
+        elif a[i][j] == a_inf[i][j] and i > 0 :
+           i -= 1
+           string_a += "-"
+           string_b += secuencia[i]
+        elif a[i][j] == a_der[i][j] and j > 0:
+           j -= 1
+           string_a += referencia[j]
+           string_b += "-"
 
-    print(referencia.upper())
-    return l
-
-
+    return string_a[::-1],string_b[::-1]
 
 if __name__ == '__main__':
-    main(sys.argv)
+    parser = argparse.ArgumentParser(description='Alineamiento global')
+    parser.add_argument("--s", action='store_true',default=False)
+    parser.add_argument("--a",action='store_true',default=False)
+    parser.add_argument("--ac",action='store_true',default=False)
+    args = parser.parse_args()
+    main(args.s, args.a, args.ac)
