@@ -1,5 +1,5 @@
 import numpy as np
-
+from NeedmanAlg import needlemanWunsch
 def Ins(x):
   return -2
 
@@ -47,7 +47,7 @@ def Pointers(di,ho,ve):
     else:
          return 'V'  
 
-def NeedlemanWunsch(s1,s2,match = 1,mismatch = -1, gap = -2):
+"""def NeedlemanWunsch(s1,s2,match = 1,mismatch = -1, gap = -2):
     penalty = {'MATCH': match, 'MISMATCH': mismatch, 'GAP': gap} #A dictionary for all the penalty valuse.
     n = len(s1) + 1 #The dimension of the matrix columns.
     m = len(s2) + 1 #The dimension of the matrix rows.
@@ -76,7 +76,7 @@ def NeedlemanWunsch(s1,s2,match = 1,mismatch = -1, gap = -2):
     for i in range(m):
       ret.append(max([ al_mat[i][j] for j in range(n) ]))
 
-    return ret
+    return ret"""
 
 def find_max_pos(score1,score2):
     pts = [s1 + s2 for s1, s2 in zip(score1, score2)]
@@ -99,7 +99,7 @@ def Hirschberg(X,Y, ret = []):
       Z += x
       W += '-'
   elif len(X) == 1 or len(Y) == 1:
-    Z, W = NeedlemanWunsch(X, Y)
+      (Z, W), score = needlemanWunsch(X, Y,False,False,False)
   else:
     xmid = len(X)//2
     Xl = X[:xmid]
@@ -115,8 +115,8 @@ def Hirschberg(X,Y, ret = []):
     Z, W = Hirschberg(Xr, Yr, ret)
     z, w = Hirschberg(Xl, Yl, ret)
 
-    if(type(w) == str and type(z) == str):
-      return (w, z)
+    #if(type(w) == str and type(z) == str):
+      #return (w, z)
    
     Z += z
     W += w
